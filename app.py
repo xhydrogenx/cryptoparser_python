@@ -4,6 +4,7 @@ import ccxt
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QRunnable, QThread, QThreadPool
 from PyQt6.QtWidgets import QApplication
+from module1.parse_crypto import get_data, save_to_json
 
 
 class ParserRunnable(QRunnable):
@@ -18,7 +19,7 @@ class ParserRunnable(QRunnable):
     def run(self):
         while not self._stopped:
             try:
-                current = self.exchange.fetch_ticker('BTC/USDT')
+                current = self.exchange.fetch_ticker(self.ticker)
                 self.window.current_price.setText(str(current["last"]))
                 print(current['last'])
                 QThread.msleep(5000)
@@ -110,7 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         current_font.setPointSize(18)
 
         self.current_price = QtWidgets.QLabel(parent=self.gridLayoutWidget_2)
-        self.current_price.setText("2131")
+        self.current_price.setText("")
         self.current_price.setStyleSheet("background-color: #EFEFEF;")
         self.current_price.setFont(current_font)
         self.current_price.setObjectName("current_price")
@@ -134,8 +135,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.graphicsView.setScene(self.scene)
 
-        self.comboBox.addItems(["Binance", "Kucoin", "coinbase", "yobit", "bybit"])
-        self.comboBox_2.addItems(["Минута", "Неделя", "Месяц", "Год"])
+        self.comboBox.addItems(["Binance", "Kucoin", "Coinbase", "Yobit", "Bybit"])
+        self.comboBox_2.addItems(["Минута", "Час", "Месяц", "Год"])
 
         self.pushButton.clicked.connect(self.on_push_button_clicked)
 
@@ -153,8 +154,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.label_4.setText(_translate("MainWindow", "TextLabel"))
 
-    def parse_crypto(self):
-        pass
+    def parse_crypto(self, ticker, interval, market):
+        """Подключение модуля для парсинга исторических данных и записи в файл"""
+        data = get_data(currency_pair=ticker, interval=interval, market=market)
+        save_to_json(data)
 
     def on_push_button_clicked(self):
         """Проверка вводных данных, запуск сервиса парсинга и обновление цены"""
@@ -167,11 +170,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ticker = self.pair_input.text()
         market = self.comboBox.currentText().lower()
-        self.parse_crypto()
+        interval = self.comboBox_2.currentText()
+
+        intervals = {
+            "Минута": "1m",
+            "Час": "1h",
+            "Месяц": "1m",
+            "Год": "1y"
+        }
+        if interval in intervals:
+            interval = intervals[interval]
+
+        self.parse_crypto(ticker, interval, market)
 
         parser_runnable = ParserRunnable(ticker, market, self)
         QThreadPool.globalInstance().start(parser_runnable)
-        print("228")
 
 
 def main():
