@@ -155,7 +155,26 @@ class MainWindow(QtWidgets.QMainWindow):
         axis.setPen(pg.mkPen('k'))
         self.graphWidget.setAxisItems({'bottom': axis})
 
-        self.comboBox.addItems(["Binance", "Kucoin", "Coinbase", "Yobit", "Bybit"])
+        self.comboBox.addItems(['binance',
+                                'coinbasepro',
+                                'kraken',
+                                'bitstamp',
+                                'bittrex',
+                                'bitfinex',
+                                'poloniex',
+                                'huobipro',
+                                'okex',
+                                'bithumb',
+                                'upbit',
+                                'cex',
+                                'gateio',
+                                'exmo',
+                                'gemini',
+                                'bitflyer',
+                                'hitbtc',
+                                'yobit',
+                                'livecoin',
+                                'kucoin'])
         self.comboBox_2.addItems(["Минута", "Час", "Месяц", "Год"])
 
         self.pushButton.clicked.connect(self.on_push_button_clicked)
@@ -217,7 +236,8 @@ class MainWindow(QtWidgets.QMainWindow):
         x_axis = [date.timestamp() for date in dates]
         print(x_axis)
 
-        self.graphWidget.plot(x=x_axis, y=prices, pen='b', symbol='o', symbolPen='b', symbolBrush='r')
+        self.graphWidget.plot(x=x_axis, y=prices, pen={'color': '#000000', 'width': 2})
+
 
 
 def main():
