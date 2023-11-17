@@ -1,13 +1,12 @@
 import datetime
 import json
 import sys
-import pyqtgraph as pg
+
 import ccxt
+import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import QRunnable, QThread, QThreadPool, QDateTime
-from PyQt6.QtWidgets import QApplication, QGraphicsView, QVBoxLayout
-from matplotlib.backends.backend_template import FigureCanvas
-from matplotlib.figure import Figure
+from PyQt6.QtCore import QRunnable, QThread, QThreadPool
+from PyQt6.QtWidgets import QApplication
 from pyqtgraph import DateAxisItem
 
 from module1.parse_crypto import get_data, save_to_json
@@ -219,8 +218,6 @@ class MainWindow(QtWidgets.QMainWindow):
         print(x_axis)
 
         self.graphWidget.plot(x=x_axis, y=prices, pen='b', symbol='o', symbolPen='b', symbolBrush='r')
-
-
 
 
 def main():
