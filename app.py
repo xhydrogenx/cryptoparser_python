@@ -1,9 +1,15 @@
+import datetime
+import json
 import sys
-
+import pyqtgraph as pg
 import ccxt
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import QRunnable, QThread, QThreadPool
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QRunnable, QThread, QThreadPool, QDateTime
+from PyQt6.QtWidgets import QApplication, QGraphicsView, QVBoxLayout
+from matplotlib.backends.backend_template import FigureCanvas
+from matplotlib.figure import Figure
+from pyqtgraph import DateAxisItem
+
 from module1.parse_crypto import get_data, save_to_json
 
 
@@ -51,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsView.setObjectName("graphicsView")
 
         self.gridLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(40, 30, 231, 191))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(40, 30, 280, 191))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
 
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
@@ -84,6 +90,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButton = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 4, 0, 1, 1)
+
+        self.graphButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton.setObjectName("graphButton")
+        self.gridLayout.addWidget(self.pushButton, 5, 0, 1, 1)
+        self.graphButton.setGeometry(80, 220, 200, 35)
 
         self.gridLayoutWidget_2 = QtWidgets.QWidget(parent=self.centralwidget)
         self.gridLayoutWidget_2.setGeometry(QtCore.QRect(330, 30, 301, 191))
@@ -135,16 +146,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.graphicsView.setScene(self.scene)
 
+        self.graphWidget = pg.PlotWidget(parent=self.graphicsView)
+        self.graphWidget.setFixedSize(721, 291)
+        axis = DateAxisItem()
+
+        self.scene.addWidget(self.graphWidget)
+        self.graphWidget.setBackground('w')
+        axis = DateAxisItem(orientation='bottom')
+        axis.setPen(pg.mkPen('k'))
+        self.graphWidget.setAxisItems({'bottom': axis})
+
         self.comboBox.addItems(["Binance", "Kucoin", "Coinbase", "Yobit", "Bybit"])
         self.comboBox_2.addItems(["Минута", "Час", "Месяц", "Год"])
 
         self.pushButton.clicked.connect(self.on_push_button_clicked)
+        self.graphButton.clicked.connect(self.graph_button_clicked)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CryptoParser"))
         self.comboBox.setPlaceholderText(_translate("MainWindow", "Выберите биржу"))
-
+        self.graphButton.setText(_translate("MainWindow", "Создать график"))
         self.label.setText(_translate("MainWindow", "Валютная пара:"))
         self.pair_input.setPlaceholderText(_translate("MainWindow", "Например: BTC/USDT"))
         self.comboBox_2.setPlaceholderText(_translate("MainWindow", "Выберите интервал"))
@@ -185,6 +207,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         parser_runnable = ParserRunnable(ticker, market, self)
         QThreadPool.globalInstance().start(parser_runnable)
+
+    def graph_button_clicked(self):
+        with open("data.json", 'r') as f:
+            graph_data = json.load(f)
+
+        dates = [datetime.datetime.fromtimestamp(d[0] / 1000) for d in graph_data]
+        prices = [d[1] for d in graph_data]
+
+        x_axis = [date.timestamp() for date in dates]
+        print(x_axis)
+
+        self.graphWidget.plot(x=x_axis, y=prices, pen='b', symbol='o', symbolPen='b', symbolBrush='r')
+
+
 
 
 def main():
