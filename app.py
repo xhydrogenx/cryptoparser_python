@@ -118,7 +118,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.gridLayout_2.addWidget(self.label_3, 1, 0, 1, 1)
 
         current_font = QtGui.QFont()
+        high_font = QtGui.QFont()
+        min_font = QtGui.QFont()
         current_font.setPointSize(18)
+        high_font.setPointSize(18)
+        min_font.setPointSize(18)
 
         self.current_price = QtWidgets.QLabel(parent=self.gridLayoutWidget_2)
         self.current_price.setText("")
@@ -127,8 +131,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_price.setObjectName("current_price")
         self.gridLayout_2.addWidget(self.current_price, 0, 1, 1, 1)
 
+        self.high_price = QtWidgets.QLabel(parent=self.gridLayoutWidget_2)
+        self.high_price.setText("")
+        self.high_price.setFont(high_font)
+        self.gridLayout_2.addWidget(self.high_price, 1, 1, 1, 1)
+
+        self.min_price = QtWidgets.QLabel(parent=self.gridLayoutWidget_2)
+        self.min_price.setText("")
+        self.min_price.setFont(high_font)
+        self.gridLayout_2.addWidget(self.min_price, 2, 1, 1, 1)
+
         self.label_4 = QtWidgets.QLabel(parent=self.gridLayoutWidget_2)
         self.label_4.setObjectName("label_4")
+        self.label_4.setFont(font)
         self.gridLayout_2.addWidget(self.label_4, 2, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -190,9 +205,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.comboBox_2.setPlaceholderText(_translate("MainWindow", "Выберите интервал"))
         self.pushButton.setText(_translate("MainWindow", "Пуск"))
         self.label_2.setText(_translate("MainWindow", "Текущий курс:"))
-        self.label_3.setText(_translate("MainWindow", "Рекомендации по паре:"))
+        self.label_3.setText(_translate("MainWindow", "Максимальная цена:"))
 
-        self.label_4.setText(_translate("MainWindow", "TextLabel"))
+        self.label_4.setText(_translate("MainWindow", "Минимальная цена:"))
 
     def parse_crypto(self, ticker, interval, market):
         """Подключение модуля для парсинга исторических данных и записи в файл"""
@@ -212,6 +227,7 @@ class MainWindow(QtWidgets.QMainWindow):
         market = self.comboBox.currentText().lower()
         interval = self.comboBox_2.currentText()
 
+
         intervals = {
             "Минута": "1m",
             "Час": "1h",
@@ -222,11 +238,16 @@ class MainWindow(QtWidgets.QMainWindow):
             interval = intervals[interval]
 
         self.parse_crypto(ticker, interval, market)
+        with open("data.json", 'r') as f:
+            price_data = json.load(f)
+        self.high_price.setText(str(price_data[-1][2]))
+        self.min_price.setText(str(price_data[-1][3]))
 
         parser_runnable = ParserRunnable(ticker, market, self)
         QThreadPool.globalInstance().start(parser_runnable)
 
     def graph_button_clicked(self):
+        """Отрисовка графика"""
         with open("data.json", 'r') as f:
             graph_data = json.load(f)
 
@@ -234,7 +255,6 @@ class MainWindow(QtWidgets.QMainWindow):
         prices = [d[1] for d in graph_data]
 
         x_axis = [date.timestamp() for date in dates]
-        print(x_axis)
 
         self.graphWidget.plot(x=x_axis, y=prices, pen={'color': '#000000', 'width': 2})
 
