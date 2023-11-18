@@ -1,14 +1,12 @@
 import datetime
 import json
 import sys
-
 import ccxt
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QRunnable, QThread, QThreadPool
 from PyQt6.QtWidgets import QApplication
 from pyqtgraph import DateAxisItem
-
 from module1.parse_crypto import get_data, save_to_json
 
 
@@ -155,9 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.scene = QtWidgets.QGraphicsScene()
-
         self.scene.addText("Hello, world!")
-
         self.graphicsView.setScene(self.scene)
 
         self.graphWidget = pg.PlotWidget(parent=self.graphicsView)

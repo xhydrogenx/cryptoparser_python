@@ -1,0 +1,4 @@
+datetime
+pyqtgraph==0.13.3
+PyQt6==6.6.0
+ccxt==4.1.52
